@@ -12,7 +12,7 @@
     var GenericAdmin = {
         url_array: null,
         fields: null,
-        obj_url: "../obj-data/",
+        obj_url: "../../obj-data/",
         admin_media_url: window.__admin_media_prefix__,
 		popup: '_popup',
         
@@ -73,7 +73,7 @@
         },
         
         getLookupUrl: function(cID) {
-            return '../../../' + this.url_array[cID][0] + '/' + this.getLookupUrlParams(cID);
+            return '../../../../' + this.url_array[cID][0] + '/' + this.getLookupUrlParams(cID);
         },
         
         getFkId: function() {
@@ -107,7 +107,7 @@
             var that = this,
                 url = this.getLookupUrl(this.cID),
                 id = 'lookup_' + this.getFkId(),
-                link = '<a class="related-lookup" id="' + id + '" href="' + url + '">&nbsp;</a>';
+                link = '<a class="related-lookup" id="' + id + '" href="' + url + '?_to_field=id">&nbsp;</a>';
                 
             link = link + '<strong id="lookup_text_'+ this.getFkId() +'" margin-left: 5px"><a target="_new" href="#"></a><span></span></strong>';
 
@@ -308,7 +308,7 @@
 
     $(document).ready(function() {
         $.ajax({
-            url: '../genericadmin-init/',
+            url: '../../genericadmin-init/',
             dataType: 'json',
             success: function(data) {
                 var url_array = data.url_array,

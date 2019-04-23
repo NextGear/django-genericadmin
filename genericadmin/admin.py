@@ -2,15 +2,17 @@ import json
 from functools import update_wrapper
 
 from django.contrib import admin
-from django.conf.urls import url
+from django.urls import path
 from django.conf import settings
+
 try:
-    from django.contrib.contenttypes.generic import GenericForeignKey,  GenericTabularInline, GenericStackedInline
+    from django.contrib.contenttypes.generic import GenericForeignKey, GenericTabularInline, GenericStackedInline
 except ImportError:
     from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
     from django.contrib.contenttypes.fields import GenericForeignKey
 
 from django.contrib.contenttypes.models import ContentType
+
 try:
     from django.utils.encoding import force_text
 except ImportError:
@@ -18,17 +20,19 @@ except ImportError:
 from django.utils.text import capfirst
 from django.contrib.admin.widgets import url_params_from_lookup_dict
 from django.http import HttpResponse, HttpResponseNotAllowed, Http404
+
 try:
     from django.contrib.admin.views.main import IS_POPUP_VAR
 except ImportError:
     from django.contrib.admin.options import IS_POPUP_VAR
-from  django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist
 
 JS_PATH = getattr(settings, 'GENERICADMIN_JS', 'genericadmin/js/')
 
+
 class BaseGenericModelAdmin(object):
     class Media:
-        js = ()
+        js = ('admin/js/jquery.init.js',)
 
     content_type_lookups = {}
     generic_fk_fields = []
@@ -63,7 +67,10 @@ class BaseGenericModelAdmin(object):
                     fields['prefix'] = prefix
                     field_list.append(fields)
         else:
-            for field in self.model._meta.virtual_fields:
+            virtual_fields = getattr(self.model._meta, 'virtual_fields', [])
+            if not virtual_fields:
+                virtual_fields = getattr(self.model._meta, 'private_fields', [])
+            for field in virtual_fields:
                 if isinstance(field, GenericForeignKey) and \
                         field.ct_field not in exclude and field.fk_field not in exclude:
                     field_list.append({
@@ -74,7 +81,8 @@ class BaseGenericModelAdmin(object):
                     })
 
         if hasattr(self, 'inlines') and len(self.inlines) > 0:
-            for FormSet, inline in zip(self.get_formsets_with_inlines(request), self.get_inline_instances(request)):
+            get_formsets_args = [request]
+            for FormSet, inline in self.get_formsets_with_inlines(*get_formsets_args):
                 if hasattr(inline, 'get_generic_field_list'):
                     prefix = FormSet.get_default_prefix()
                     field_list = field_list + inline.get_generic_field_list(request, prefix)
@@ -85,12 +93,15 @@ class BaseGenericModelAdmin(object):
         def wrap(view):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
+
             return update_wrapper(wrapper, view)
 
         custom_urls = [
-            url(r'^obj-data/$', wrap(self.generic_lookup), name='admin_genericadmin_obj_lookup'),
-            url(r'^genericadmin-init/$', wrap(self.genericadmin_js_init), name='admin_genericadmin_init'),
+            path('obj-data/', wrap(self.generic_lookup), name='admin_genericadmin_obj_lookup'),
+            path('genericadmin-init/', wrap(self.genericadmin_js_init),
+                 name='admin_genericadmin_init'),
         ]
+        print(custom_urls + super(BaseGenericModelAdmin, self).get_urls())
         return custom_urls + super(BaseGenericModelAdmin, self).get_urls()
 
     def genericadmin_js_init(self, request):
@@ -141,7 +152,6 @@ class BaseGenericModelAdmin(object):
         else:
             resp = ''
         return HttpResponse(resp, content_type='application/json')
-
 
 
 class GenericAdminModelAdmin(BaseGenericModelAdmin, admin.ModelAdmin):
