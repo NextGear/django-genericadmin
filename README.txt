@@ -21,11 +21,6 @@ any models.
 If you are using the staticfiles app, then run
 ``manage.py collectstatic`` and you should be good to go.
 
-If you don't know what I'm talking about or your django version < 1.3,
-then you should link or copy ``genericadmin/media/js/`` to your asset
-directory and set ``GENERICADMIN_JS`` to a the relative destination of
-your just copied files.
-
 Usage
 -----
 
