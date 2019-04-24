@@ -100,8 +100,7 @@ class BaseGenericModelAdmin(object):
             path('obj-data/', wrap(self.generic_lookup), name='admin_genericadmin_obj_lookup'),
             path('genericadmin-init/', wrap(self.genericadmin_js_init),
                  name='admin_genericadmin_init'),
-        ]
-        print(custom_urls + super(BaseGenericModelAdmin, self).get_urls())
+        ])
         return custom_urls + super(BaseGenericModelAdmin, self).get_urls()
 
     def genericadmin_js_init(self, request):
