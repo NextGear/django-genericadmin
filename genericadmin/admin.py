@@ -2,7 +2,7 @@ import json
 from functools import update_wrapper
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import re_path, reverse
 from django.conf import settings
 
 try:
@@ -97,14 +97,16 @@ class BaseGenericModelAdmin(object):
             return update_wrapper(wrapper, view)
 
         custom_urls = [
-            path('obj-data/', wrap(self.generic_lookup), name='admin_genericadmin_obj_lookup'),
-            path('genericadmin-init/', wrap(self.genericadmin_js_init), name='admin_genericadmin_init'),
+            re_path(r'obj-data/$', wrap(self.generic_lookup), name='admin_genericadmin_obj_lookup'),
+            re_path(r'genericadmin-init/$', wrap(self.genericadmin_js_init),
+                    name='admin_genericadmin_init'),
         ]
         return custom_urls + super(BaseGenericModelAdmin, self).get_urls()
 
     def genericadmin_js_init(self, request):
         if request.method == 'GET':
             obj_dict = {}
+            admin_index = reverse('admin:index')
             for c in ContentType.objects.all():
                 val = force_text('%s/%s' % (c.app_label, c.model))
                 params = self.content_type_lookups.get('%s.%s' % (c.app_label, c.model), {})
@@ -119,6 +121,7 @@ class BaseGenericModelAdmin(object):
                 'url_array': obj_dict,
                 'fields': self.get_generic_field_list(request),
                 'popup_var': IS_POPUP_VAR,
+                'admin_url': admin_index,
             }
             resp = json.dumps(data, ensure_ascii=False)
             return HttpResponse(resp, content_type='application/json')

@@ -12,7 +12,8 @@
     var GenericAdmin = {
         url_array: null,
         fields: null,
-        obj_url: "../../obj-data/",
+        admin_url: null,
+        obj_url: "obj-data/",
         admin_media_url: window.__admin_media_prefix__,
 		popup: '_popup',
         
@@ -73,7 +74,7 @@
         },
         
         getLookupUrl: function(cID) {
-            return '../../../../' + this.url_array[cID][0] + '/' + this.getLookupUrlParams(cID);
+            return this.admin_url + this.url_array[cID][0] + '/' + this.getLookupUrlParams(cID);
         },
         
         getFkId: function() {
@@ -202,10 +203,11 @@
             };
         },
 
-        install: function(fields, url_array, popup_var) {
+        install: function(fields, url_array, admin_url, popup_var) {
             var that = this;
 
             this.url_array = url_array;
+            this.admin_url = admin_url;
             this.fields = fields;
 			this.popup = popup_var || this.popup;
             
@@ -249,14 +251,16 @@
     var InlineAdmin = {
         sub_admins: null,
         url_array: null,
+        admin_url: null,
         fields: null,
 		popup: '_popup',
         
-        install: function(fields, url_array, popup_var) {
+        install: function(fields, url_array, admin_url, popup_var) {
             var inline_count = $('#id_' + fields.prefix + '-TOTAL_FORMS').val(),
                 admin;
             
             this.url_array = url_array;
+            this.admin_url = admin_url;
             this.fields = fields;
             this.sub_admins = [];
 			this.popup = popup_var || this.popup;
@@ -265,7 +269,7 @@
                 f = $.extend({}, this.fields);
                 f.number = j;
                 admin = $.extend({}, GenericAdmin);
-                admin.install(f, this.url_array, popup_var);
+                admin.install(f, this.url_array, this.admin_url, popup_var);
                 this.sub_admins.push(admin);
             }
             $('#' + this.fields.prefix + '-group .add-row a').click(this.addHandler());
@@ -277,7 +281,7 @@
                 var added_fields = $.extend({}, that.fields),
                     admin = $.extend({}, GenericAdmin);
                 added_fields.number = ($('#id_' + that.fields.prefix + '-TOTAL_FORMS').val() - 1);
-                admin.install(added_fields, that.url_array, that.popup);
+                admin.install(added_fields, that.url_array, that.admin_url, that.popup);
                 that.sub_admins.push(admin);
                 
                 $('#' + that.fields.prefix + '-' + added_fields.number + ' .inline-deletelink').click(
@@ -308,10 +312,11 @@
 
     $(document).ready(function() {
         $.ajax({
-            url: '../../genericadmin-init/',
+            url: 'genericadmin-init/',
             dataType: 'json',
             success: function(data) {
                 var url_array = data.url_array,
+                    admin_url = data.admin_url,
                     ct_fields = data.fields,
 					popup_var = data.popup_var,
                     fields;
@@ -319,9 +324,9 @@
                 for (var i = 0; i < ct_fields.length; i++) {
                     fields = ct_fields[i];
                     if (fields.inline === false) {
-                        $.extend({}, GenericAdmin).install(fields, url_array, popup_var);
+                        $.extend({}, GenericAdmin).install(fields, url_array, admin_url, popup_var);
                     } else {
-                        $.extend({}, InlineAdmin).install(fields, url_array, popup_var);
+                        $.extend({}, InlineAdmin).install(fields, url_array, admin_url, popup_var);
                     }
                 }
             }
