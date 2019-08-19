@@ -15,8 +15,8 @@
         admin_url: null,
         obj_url: "obj-data/",
         admin_media_url: window.__admin_media_prefix__,
-		popup: '_popup',
-        
+        popup: '_popup',
+
         prepareSelect: function(select) {
             var that = this,
                 opt_keys = [],
@@ -31,7 +31,7 @@
                 if (this.value) {
                     if (that.url_array[this.value]) {
                         key = that.url_array[this.value][0].split('/')[0];
-                        
+
                         opt = $(this).clone();
                         opt.text(that.capFirst(opt.text()));
                         if ($.inArray(key, opt_keys) < 0) {
@@ -48,7 +48,7 @@
                 }
             });
             select.empty().append(no_value);
-            
+
             opt_keys = opt_keys.sort();
 
             $.each(opt_keys, function(index, key) {
@@ -63,7 +63,7 @@
         },
 
         getLookupUrlParams: function(cID) {
-            var q = this.url_array[cID][1] || {}, 
+            var q = this.url_array[cID][1] || {},
                 str = [];
             for(var p in q) {
                 str.push(encodeURIComponent(p) + "=" + encodeURIComponent(q[p]));
@@ -72,11 +72,11 @@
             url = x ? ("?" + x) : "";
             return url;
         },
-        
+
         getLookupUrl: function(cID) {
             return this.admin_url + this.url_array[cID][0] + '/' + this.getLookupUrlParams(cID);
         },
-        
+
         getFkId: function() {
             if (this.fields.inline === false) {
                 return 'id_' + this.fields.fk_field;
@@ -84,7 +84,7 @@
                 return ['id_', this.fields.prefix, '-', this.fields.number, '-', this.fields.fk_field].join('');
             }
         },
-        
+
         getCtId: function() {
             if (this.fields.inline === false) {
                 return 'id_' + this.fields.ct_field;
@@ -92,24 +92,24 @@
                 return ['id_', this.fields.prefix, '-', this.fields.number, '-', this.fields.ct_field].join('');
             }
         },
-        
+
         capFirst: function(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         },
-        
+
         hideLookupLink: function() {
             var this_id = this.getFkId();
             $('#lookup_' + this_id).unbind().remove();
             $('#lookup_text_' + this_id + ' a').remove();
             $('#lookup_text_' + this_id + ' span').remove();
         },
-        
+
         showLookupLink: function() {
             var that = this,
                 url = this.getLookupUrl(this.cID),
-                id = 'lookup_' + this.getFkId(),
-                link = '<a class="related-lookup" id="' + id + '" href="' + url + '?_to_field=id">&nbsp;</a>';
-                
+                id = 'lookup_' + this.getFkId();
+                link = '<a class="related-lookup" id="' + id + '" href="' + url + '">&nbsp;</a>';
+
             link = link + '<strong id="lookup_text_'+ this.getFkId() +'" margin-left: 5px"><a target="_new" href="#"></a><span></span></strong>';
 
             // insert link html after input element
@@ -117,7 +117,7 @@
 
             return id;
         },
-        
+
         pollInputChange: function(window) {
             var that = this,
                 interval_id = setInterval(function() {
@@ -129,26 +129,26 @@
                 },
                 150);
         },
-        
+
         popRelatedObjectLookup: function(link) {
             var name = id_to_windowname(this.getFkId()),
-				url_parts = [],
-                href, 
+                url_parts = [],
+                href,
                 win;
 
             if (link.href.search(/\?/) >= 0) {
-				url_parts[0] = '&';
+                url_parts[0] = '&';
                 //href = link.href + '&pop=1';
             } else {
-				url_parts[0] = '?';
+                url_parts[0] = '?';
                 //href = link.href + '?pop=1';
             }
-			url_parts[1] = this.popup;
-			url_parts[2] = '=1';
-			href = link.href + url_parts.join('');
+            url_parts[1] = this.popup;
+            url_parts[2] = '=1';
+            href = link.href + url_parts.join('');
 
-	    var left = window.screen.width / 2 - 400,
-	        top = window.screen.height / 2 - 250;
+        var left = window.screen.width / 2 - 400,
+            top = window.screen.height / 2 - 250;
             win = window.open(href, name, 'left='+left+',top='+top+',height=500,width=800,resizable=yes,scrollbars=yes');
 
             // wait for popup to be closed and load object data
@@ -157,14 +157,14 @@
             win.focus();
             return false;
         },
-        
+
         updateObjectData: function() {
             var that = this;
             return function() {
                 var value = that.object_input.val();
-                
-                if (!value) { 
-                    return 
+
+                if (!value) {
+                    return
                 }
                 //var this_id = that.getFkId();
                 $('#lookup_text_' + that.getFkId() + ' span').text('loading...');
@@ -209,11 +209,11 @@
             this.url_array = url_array;
             this.admin_url = admin_url;
             this.fields = fields;
-			this.popup = popup_var || this.popup;
-            
+            this.popup = popup_var || this.popup;
+
             // store the base element
             this.object_input = $("#" + this.getFkId());
-            
+
             // find the select we need to change
             this.object_select = this.prepareSelect($("#" + this.getCtId()));
 
@@ -228,6 +228,7 @@
                 if (this.value) {
                     that.cID = this.value;
                     link_id = that.showLookupLink();
+
                     $('#' + link_id).click(function(e) {
                         e.preventDefault();
                         that.popRelatedObjectLookup(this);
@@ -247,24 +248,24 @@
             this.updateObjectData()();
         }
     };
-    
+
     var InlineAdmin = {
         sub_admins: null,
         url_array: null,
         admin_url: null,
         fields: null,
-		popup: '_popup',
-        
+        popup: '_popup',
+
         install: function(fields, url_array, admin_url, popup_var) {
             var inline_count = $('#id_' + fields.prefix + '-TOTAL_FORMS').val(),
                 admin;
-            
+
             this.url_array = url_array;
             this.admin_url = admin_url;
             this.fields = fields;
             this.sub_admins = [];
-			this.popup = popup_var || this.popup;
-            
+            this.popup = popup_var || this.popup;
+
             for (var j = 0; j < inline_count; j++) {
                 f = $.extend({}, this.fields);
                 f.number = j;
@@ -283,7 +284,7 @@
                 added_fields.number = ($('#id_' + that.fields.prefix + '-TOTAL_FORMS').val() - 1);
                 admin.install(added_fields, that.url_array, that.admin_url, that.popup);
                 that.sub_admins.push(admin);
-                
+
                 $('#' + that.fields.prefix + '-' + added_fields.number + ' .inline-deletelink').click(
                     that.removeHandler(that)
                 );
@@ -294,7 +295,7 @@
                 var parent_id,
                     deleted_num,
                     sub_admin;
-                
+
                 e.preventDefault();
                 parent_id = $(e.currentTarget).parents('.dynamic-' + that.fields.prefix).first().attr('id');
                 deleted_num = parseInt(parent_id.charAt(parent_id.length - 1), 10);
@@ -318,9 +319,9 @@
                 var url_array = data.url_array,
                     admin_url = data.admin_url,
                     ct_fields = data.fields,
-					popup_var = data.popup_var,
+                    popup_var = data.popup_var,
                     fields;
-                    
+
                 for (var i = 0; i < ct_fields.length; i++) {
                     fields = ct_fields[i];
                     if (fields.inline === false) {

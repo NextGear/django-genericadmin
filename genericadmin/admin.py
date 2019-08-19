@@ -1,6 +1,7 @@
 import json
 from functools import update_wrapper
 
+from django.apps import apps
 from django.contrib import admin
 from django.urls import re_path, reverse
 from django.conf import settings
@@ -104,6 +105,10 @@ class BaseGenericModelAdmin(object):
         return custom_urls + super(BaseGenericModelAdmin, self).get_urls()
 
     def genericadmin_js_init(self, request):
+        def get_model_pk_field(app_label, model_name):
+            model = apps.get_model(app_label, model_name)
+            return model._meta.pk.name
+
         if request.method == 'GET':
             obj_dict = {}
             admin_index = reverse('admin:index')
@@ -111,6 +116,15 @@ class BaseGenericModelAdmin(object):
                 val = force_text('%s/%s' % (c.app_label, c.model))
                 params = self.content_type_lookups.get('%s.%s' % (c.app_label, c.model), {})
                 params = url_params_from_lookup_dict(params)
+
+                try:
+                    # If the model gives a lookup error, it shouldn't work anyways, so prevent an error
+                    params.update({
+                        '_to_field': get_model_pk_field(c.app_label, c.model),
+                    })
+                except LookupError:
+                    continue
+
                 if self.content_type_whitelist:
                     if val in self.content_type_whitelist:
                         obj_dict[c.id] = (val, params)
