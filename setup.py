@@ -11,12 +11,12 @@ def convert_readme():
     return open('README.txt').read()
 
 setup(
-    name='django-genericadmin',
-    version='0.8.1',
+    name='nextgear-django-genericadmin',
+    version='0.8.2',
     description="Adds support for generic relations within Django's admin interface.",
-    author='Weston Nielson, Jan Schrewe, Arthur Hanson',
-    author_email='wnielson@gmail.com, jschrewe@googlemail.com, worldnomad@gmail.com',
-    url='https://github.com/arthanson/django-genericadmin',
+    author='Stefan van der Woude',
+    author_email='stefan@nextgear.nl',
+    url='https://github.com/NextGear/django-genericadmin/',
     packages = ['genericadmin'],
 #    package_data={'genericadmin': ['static/genericadmin/js/genericadmin.js']},
     classifiers=[
